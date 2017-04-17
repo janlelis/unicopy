@@ -1,0 +1,184 @@
+#!/usr/bin/env ruby
+
+require "rationalist"
+require "paint"
+require "unicopy"
+
+argv = Rationalist.parse(
+  ARGV,
+  string: '_',
+  alias: {
+    p: 'print',
+    s: 'string',
+    v: 'version',
+  }.merge(Hash[Unicopy::DUMP_FORMATS.select{ |k,v| v[:alias] }.map{ |k,v| [v[:alias], k] }]),
+  boolean: [
+    'parse-decimal',
+    'help',
+    'print',
+    'string',
+    'version',
+    *Unicopy::DUMP_FORMATS.keys
+  ]
+)
+
+if argv[:version]
+  puts "unicopy #{Unicopy::VERSION} by #{Paint["J-_-L", :bold]} <https://github.com/janlelis/unicopy>"
+  exit(0)
+end
+
+
+if argv[:help]
+dump_format_description = Unicopy::DUMP_FORMATS.map{ |dump_format, info|
+  "--#{dump_format.ljust(20)}| #{info[:alias] ? "-#{info[:alias]}" : "  "} | #{info[:description]}"
+}.join("\n  ")
+
+  puts <<-HELP
+
+  #{Paint["DESCRIPTION", :underline]}
+
+  Converts Unicode codepoints to a string (or vice versa) and copies it to the system clipboard.
+  Can also convert codepoints to many dump formats.
+
+  #{Paint["USAGE", :underline]}
+
+  CODEPOINTS TO STRING
+
+  #{Paint["unicopy", :bold]} [options] codepoints
+
+  Codepoints format is hexadecimal, "U+" is permitted, examples:
+
+  $ unicopy 52 75 62 79 20 1F32B --print
+  Ruby 🌫
+
+  $ unicopy U+0052 U+0075 U+0062 U+0079 U+0020 U+1F32B --print
+  Ruby 🌫
+
+  STRING TO CODEPOINTS
+
+  #{Paint["unicopy", :bold]} (--string|-s) [options] string
+
+  $ unicopy -sp "Ruby 🌫"
+  U+0052 U+0075 U+0062 U+0079 U+0020 U+1F32B
+
+  If data is retrieved via STDIN, it will split alongside newlines.
+
+  #{Paint["OPTIONS", :underline]}
+
+  --help                |    | this help page
+  --parse-decimal       |    | interpret given codepoints as decimal, instead of hexadecimal values
+  --print               | -p | do not copy to system clipboard, but print to screen
+  --string              | -s | see above
+  --version             |    | displays version of unicopy
+  --(dump format)       |    | specify the format to be used for dumping the codepoints (see below)
+
+  #{Paint["DUMP FORMATS", :underline]}
+
+  #{dump_format_description}
+
+  Examples:
+
+  $ unicopy 52 75 62 79 20 1F32B --print --hex
+  52 75 62 79 20 1F32B
+
+  $ unicopy --string "Ruby 🌫" --print --hex
+  52 75 62 79 20 1F32B
+
+  $ unicopy 52 75 62 79 20 1F32B --print --uplus
+  U+0052 U+0075 U+0062 U+0079 U+0020 U+1F32B
+
+  $ unicopy --string "Ruby 🌫" --print --uplus
+  U+0052 U+0075 U+0062 U+0079 U+0020 U+1F32B
+
+  $ unicopy 52 75 62 79 20 1F32B --print --0x
+  0x0052 0x0075 0x0062 0x0079 0x0020 0x1F32B
+
+  $ unicopy --string "Ruby 🌫" --print --0x
+  0x0052 0x0075 0x0062 0x0079 0x0020 0x1F32B
+
+  $ unicopy 52 75 62 79 20 1F32B --print --dec
+  82 117 98 121 32 127787
+
+  $ unicopy --string "Ruby 🌫" --print --dec
+  82 117 98 121 32 127787
+
+  $ unicopy 52 75 62 79 20 1F32B --print --ruby
+  \\u{52 75 62 79 20 1F32B}
+
+  $ unicopy --string "Ruby 🌫" --print --ruby
+  \\u{52 75 62 79 20 1F32B}
+
+  $ unicopy 52 75 62 79 20 1F32B --print --js
+  \\u0052\\u0075\\u0062\\u0079\\u0020\\uD83C\\uDF2B
+
+  $ unicopy --string "Ruby 🌫" --print --js
+  \\u0052\\u0075\\u0062\\u0079\\u0020\\uD83C\\uDF2B
+
+  $ unicopy 52 75 62 79 20 1F32B --print --es6
+  \\u{52}\\u{75}\\u{62}\\u{79}\\u{20}\\u{1F32B}
+
+  $ unicopy --string "Ruby 🌫" --print --es6
+  \\u{52}\\u{75}\\u{62}\\u{79}\\u{20}\\u{1F32B}
+
+  $ unicopy 52 75 62 79 20 1F32B --print --css
+  \\52\\75\\62\\79\\20\\1f32b
+
+  $ unicopy --string "Ruby 🌫" --print --css
+  \\52\\75\\62\\79\\20\\1f32b
+
+  $ unicopy 52 75 62 79 20 1F32B --print --html-hex
+  &#x52;&#x75;&#x62;&#x79;&#x20;&#x1F32B;
+
+  $ unicopy --string "Ruby 🌫" --print --html-hex
+  &#x52;&#x75;&#x62;&#x79;&#x20;&#x1F32B;
+
+  $ unicopy 52 75 62 79 20 1F32B --print --html-dec
+  &#82;&#117;&#98;&#121;&#32;&#127787;
+
+  $ unicopy --string "Ruby 🌫" --print --html-dec
+  &#82;&#117;&#98;&#121;&#32;&#127787;
+
+  $ unicopy 52 75 62 79 20 1F32B --print --bytes-utf8
+  52 75 62 79 20 F0 9F 8C AB
+
+  $ unicopy --string "Ruby 🌫" --print --bytes-utf8
+  52 75 62 79 20 F0 9F 8C AB
+
+  #{Paint["MORE INFO", :underline]}
+
+  https://github.com/janlelis/unicopy
+
+  HELP
+  exit(0)
+end
+
+if argv[:_]
+  codepoints = argv.delete :_
+elsif !$stdin.tty?
+  codepoints = $stdin.read.split($/)
+else
+  codepoints = nil
+end
+
+options = {
+  parse_decimal: argv[:"parse-decimal"],
+  print:   argv[:print],
+  string:  argv[:string],
+}
+
+dump_formats = Unicopy::DUMP_FORMATS.keys.select{ |dump_format| argv[dump_format.to_sym] }
+case dump_formats.size
+when 0
+  # nothing
+when 1
+  options[:dump] = dump_formats[0]
+else
+  raise ArgumentError, "only one dump format can be passed to unicopy"
+end
+
+begin
+  Unicopy.unicopy(*codepoints, **options)
+rescue ArgumentError
+  $stderr.puts Paint[$!.message, :red]
+  exit(1)
+end
