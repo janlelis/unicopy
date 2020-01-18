@@ -185,4 +185,4 @@ $ unicopy --string "Ruby 🌫" --print --bytes-utf8
 - [unibits](https://github.com/janlelis/unibits)
 - [uniscribe](https://github.com/janlelis/uniscribe)
 
-Copyright (C) 2017 Jan Lelis <http://janlelis.com>. Released under the MIT license.
+Copyright (C) 2017-2020 Jan Lelis <https://janlelis.com>. Released under the MIT license.
