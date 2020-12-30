@@ -1,4 +1,4 @@
-# unicopy [![[version]](https://badge.fury.io/rb/unicopy.svg)](http://badge.fury.io/rb/unicopy)  [![[travis]](https://travis-ci.org/janlelis/unicopy.svg)](https://travis-ci.org/janlelis/unicopy)
+# unicopy | Convert the Codepoints [![[version]](https://badge.fury.io/rb/unicopy.svg)](https://badge.fury.io/rb/unicopy)  [![[ci]](https://github.com/janlelis/unicopy/workflows/Test/badge.svg)](https://github.com/janlelis/unicopy/actions?query=workflow%3ATest)
 
 CLI utility which converts Unicode codepoints to a string (or vice versa). Copies the result to the system clipboard or just prints it to the console.
 
