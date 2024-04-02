@@ -1,6 +1,6 @@
 ## CHANGELOG
 
-### 1.0.2 (unreleased)
+### 1.0.2
 
 * Re-release with MFA setting in gemspec + updated CI
 
