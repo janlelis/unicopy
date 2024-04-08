@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'paint', '>= 0.9', '< 3.0'
   gem.add_dependency 'rationalist', '~> 2.0'
-  gem.add_dependency 'clipboard', '~> 1.1'
+  gem.add_dependency 'clipboard', '>= 1.1', '< 3.0'
 
   gem.required_ruby_version = ">= 2.0"
 end
